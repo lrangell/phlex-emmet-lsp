@@ -13,6 +13,8 @@ use ropey::Rope;
 use tower::ServiceBuilder;
 
 mod lsp;
+mod parser;
+mod types;
 
 struct TickEvent;
 
@@ -97,3 +99,6 @@ async fn main() {
 
     server.run_buffered(stdin, stdout).await.unwrap();
 }
+
+#[cfg(test)]
+mod tests;
