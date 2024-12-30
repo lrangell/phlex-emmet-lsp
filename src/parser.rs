@@ -1,16 +1,17 @@
+use anyhow::anyhow;
+use anyhow::Result;
+
 use nom::{
-    branch::alt,
-    bytes::complete::{is_not, take_while},
-    character::complete::{alphanumeric1, char, digit0, digit1},
-    combinator::{map, opt},
-    multi::{many0, separated_list0},
+    bytes::complete::is_not,
+    character::complete::{alphanumeric1, char, digit1},
+    combinator::opt,
+    multi::many0,
     sequence::{preceded, tuple},
     IResult,
 };
-use nom_supreme::tag::complete::tag;
-use nom_supreme::{error::ErrorTree, final_parser::final_parser};
 
 use crate::types::EmmetNode;
+use nom_supreme::error::ErrorTree;
 
 fn parse_emmet_node(input: &str) -> IResult<&str, EmmetNode, ErrorTree<&str>> {
     let class = many0(preceded(char('.'), is_not(".#>+")));
@@ -47,12 +48,14 @@ fn parse_emmet(input: &str) -> IResult<&str, EmmetNode, ErrorTree<&str>> {
     node.children = children;
 
     let (input, siblings) = parse_siblings(input)?;
-    dbg!(&siblings);
     node.siblings = siblings;
 
     Ok((input, node))
 }
 
-pub fn parse(input: &str) -> Result<EmmetNode, ErrorTree<&str>> {
-    final_parser(parse_emmet)(input)
+pub fn parse(input: String) -> Result<EmmetNode> {
+    match parse_emmet(input.as_str()) {
+        Ok((_, node)) => Ok(node),
+        Err(e) => Err(anyhow!("Failed to parse Emmet expression: {}", e)),
+    }
 }
