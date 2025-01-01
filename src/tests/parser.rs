@@ -14,6 +14,12 @@ fn nested_tags() {
 }
 
 #[test]
+fn sibling() {
+    let div = from_tag("div").add_sibling(from_tag("p"));
+    assert_eq!(parse("div+p").unwrap(), div)
+}
+
+#[test]
 fn siblings() {
     let div = from_tag("div").add_sibling(from_tag("p").add_sibling_str("h1"));
     assert_eq!(parse("div+p+h1").unwrap(), div)
