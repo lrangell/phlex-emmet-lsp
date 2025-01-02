@@ -2,6 +2,10 @@
 name = "phlex_emmet_ls"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+keywords = ["lsp", "ruby", "emmet"]
+categories = ["command-line-utilities"]
+repository = "https://github.com/lrangell/phlex-emmet-lsp"
 
 [dependencies]
 anyhow = "1.0.86"
