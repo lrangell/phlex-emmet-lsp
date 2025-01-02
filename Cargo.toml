@@ -1,5 +1,5 @@
 [package]
-name = "phlex-emmet-lsp"
+name = "phlex_emmet_ls"
 version = "0.1.0"
 edition = "2021"
 
@@ -23,3 +23,7 @@ tracing-subscriber = "0.3.18"
 
 [dev-dependencies]
 test-log = { version = "0.2.16", features = ["trace", "color"] }
+
+[[bench]]
+name = "bench"
+harness = false
