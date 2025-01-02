@@ -1,6 +1,7 @@
 #![allow(unstable_name_collisions)]
 use crate::types::EmmetNode;
 use itertools::Itertools;
+use tracing::info;
 
 pub trait Renderer {
     fn render(&self) -> String;
@@ -10,7 +11,7 @@ impl Renderer for EmmetNode {
         let classes = if self.classes.is_empty() {
             None
         } else {
-            Some(format!("class: {}", self.classes.iter().join(" ")))
+            Some(format!("class: \'{}\'", self.classes.iter().join(" ")))
         };
 
         let id = self.id.clone().map(|id| format!("id: {}", id));
@@ -24,12 +25,11 @@ impl Renderer for EmmetNode {
         let args = if arguments.is_empty() {
             "".to_owned()
         } else {
-            arguments.iter().join("")
+            format!("({})", { arguments.iter().join(", ") })
         };
 
         format!(
-            "{tag}{arguments} {{ {children} }}
-             {siblings}",
+            "{tag}{arguments} {{ {children} }} {siblings}",
             tag = self.tag,
             arguments = args,
             children = self.children.iter().map(|n| n.render()).join("\n"),

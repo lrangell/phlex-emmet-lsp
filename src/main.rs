@@ -13,11 +13,13 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use tower::ServiceBuilder;
 use tracing::info;
+use utils::extract_abbreviation;
 
 mod lsp;
 mod parser;
 mod rendering;
 mod types;
+mod utils;
 
 struct TickEvent;
 
@@ -53,8 +55,8 @@ async fn main() {
                     .uri
                     .as_str()
                     .to_owned();
-                let line_number = params.text_document_position.position.line as usize;
-                let col_number = params.text_document_position.position.character as usize;
+
+                info!(position = ?params.text_document_position.position);
 
                 let doc = st
                     .documents
@@ -64,10 +66,15 @@ async fn main() {
                         "Document not found",
                     ))
                     .unwrap();
-                let line = doc.line(line_number);
-                let text = line.slice(..col_number).to_string();
-                info!("Completion request: {:#?}", &text);
-                async move { Ok(lsp::completion_handler(text).await?) }
+                let abbr = extract_abbreviation(doc, params.text_document_position.position);
+                info!("Completion request: {:#?}", &abbr);
+                async move {
+                    Ok(lsp::completion_handler(
+                        abbr.as_str(),
+                        params.text_document_position.position,
+                    )
+                    .await?)
+                }
             })
             .notification::<notification::Initialized>(|_, _| ControlFlow::Continue(()))
             .notification::<notification::DidChangeConfiguration>(|_, _| ControlFlow::Continue(()))
