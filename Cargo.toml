@@ -6,6 +6,7 @@ license = "MIT"
 keywords = ["lsp", "ruby", "emmet"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/lrangell/phlex-emmet-lsp"
+description = "A language server for generating Phlex code from Emmet abbreviations"
 
 [dependencies]
 anyhow = "1.0.86"
