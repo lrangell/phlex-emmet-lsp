@@ -6,7 +6,7 @@ use crate::types::EmmetNode;
 peg::parser! {
   grammar emmet() for str {
     rule identifier() -> String
-            = n:$(quiet!{['a'..='z' | 'A'..='Z' | '0'..='9' | '-' ]+}) {n.to_string()} / expected!("identifier")
+            = n:$(quiet!{['a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' ]+}) {n.to_string()} / expected!("identifier")
 
     rule id() -> String = "#" i:identifier() {i}
 
@@ -17,17 +17,36 @@ peg::parser! {
     rule multiplier() -> usize
             = "*" n:$(['0'..='9']+) {n.parse().unwrap()}
 
-    rule text() -> String = "{" t:$([_]+) "}" { t.to_string() }
-
+    rule text() -> String
+        = "{" chars:([^'}']*) "}" { chars.iter().collect::<String>() }
 
     rule children() -> EmmetNode
             = ">" n:node()  { n }
     rule sibling() -> EmmetNode
             = "+" n:node()  { n }
 
+    rule implicit_tag() -> String
+        = &(id() / class() / ) { "div".to_string() }
+
     pub rule node() -> EmmetNode
-            = tag:tag() id:id()? classes:class()* multiplier:multiplier()? children:children()* siblings:sibling()*
-                { EmmetNode { tag, id, classes, multiplier: multiplier.unwrap_or(1), children , siblings } }
+            = tag:(tag() / implicit_tag())
+              id:id()?
+              classes:class()*
+              text:text()?
+              multiplier:multiplier()?
+              children:children()*
+              siblings:sibling()* {
+                EmmetNode {
+                    tag,
+                    id,
+                    classes,
+                    text,
+                    multiplier: multiplier.unwrap_or(1),
+                    children,
+                    siblings
+                }
+            }
+
 
   }
 }

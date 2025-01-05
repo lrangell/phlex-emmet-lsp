@@ -8,6 +8,7 @@ pub struct EmmetNode {
     pub children: Vec<EmmetNode>,
     pub siblings: Vec<EmmetNode>,
     pub multiplier: usize,
+    pub text: Option<String>,
 }
 
 type Children = Vec<EmmetNode>;
@@ -30,6 +31,7 @@ impl EmmetNode {
             children: children.unwrap_or_default(),
             siblings: siblings.unwrap_or_default(),
             multiplier: 1,
+            text: None,
         }
     }
     pub fn from_tag(tag: &str) -> EmmetNode {
@@ -40,6 +42,7 @@ impl EmmetNode {
             children: vec![],
             siblings: vec![],
             multiplier: 1,
+            text: None,
         }
     }
 
@@ -50,6 +53,9 @@ impl EmmetNode {
         sibling: Option<EmmetNode>,
         child_str: Option<&str>,
         sibling_str: Option<&str>,
+        id: Option<&str>,
+        text: Option<&str>,
+        class: Option<&str>,
     ) -> Self {
         if let Some(c) = child {
             self.children.push(c)
@@ -63,6 +69,15 @@ impl EmmetNode {
         }
         if let Some(s_str) = sibling_str {
             self.siblings.push(from_tag(s_str))
+        }
+        if let Some(id_str) = id {
+            self.id = Some(id_str.to_string())
+        }
+        if let Some(text) = text {
+            self.text = Some(text.to_string())
+        }
+        if let Some(class) = class {
+            self.classes.push(class.to_string());
         }
 
         self.to_owned()
