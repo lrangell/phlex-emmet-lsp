@@ -14,7 +14,7 @@ impl Renderer for EmmetNode {
             Some(format!("class: \'{}\'", self.classes.iter().join(" ")))
         };
 
-        let id = self.id.clone().map(|id| format!("id: {}", id));
+        let id = self.id.clone().map(|id| format!("id: '{}'", id));
 
         let arguments: Vec<String> = [classes, id]
             .into_iter()
