@@ -6,7 +6,7 @@ use crate::types::EmmetNode;
 peg::parser! {
   grammar emmet() for str {
     rule identifier() -> String
-            = n:$(quiet!{['a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' ]+}) {n.to_string()} / expected!("identifier")
+            = n:$(quiet!{[^ '#' | '.' | '*' | '{' |  '+' |  '>' ]+}) {n.to_string()} / expected!("identifier")
 
     rule id() -> String = "#" i:identifier() {i}
 
@@ -35,7 +35,8 @@ peg::parser! {
               text:text()?
               multiplier:multiplier()?
               children:children()*
-              siblings:sibling()* {
+              siblings:sibling()*
+            {
                 EmmetNode {
                     tag,
                     id,
