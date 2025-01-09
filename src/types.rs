@@ -90,12 +90,6 @@ impl EmmetNode {
     pub fn add_sibling(&mut self, sibling: EmmetNode) -> Self {
         self.add().sibling(sibling).call()
     }
-    pub fn add_child_str(&mut self, child: &str) -> Self {
-        self.add().child_str(child).call()
-    }
-    pub fn add_sibling_str(&mut self, sibling: &str) -> Self {
-        self.add().sibling_str(sibling).call()
-    }
 }
 
 pub fn from_tag(tag: &str) -> EmmetNode {
