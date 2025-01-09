@@ -2,7 +2,7 @@ use std::ops::ControlFlow;
 
 use async_lsp::client_monitor::ClientProcessMonitorLayer;
 use async_lsp::concurrency::ConcurrencyLayer;
-use async_lsp::lsp_types::{notification, request, InitializeResult};
+use async_lsp::lsp_types::{notification, request, InitializeResult, ServerInfo};
 use async_lsp::panic::CatchUnwindLayer;
 use async_lsp::router::Router;
 use async_lsp::server::LifecycleLayer;
@@ -25,16 +25,22 @@ struct TickEvent;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    let log_path = std::env::temp_dir().join("phlex_emmet_ls").join("logs");
+    let _ = std::fs::create_dir(log_path.parent().unwrap());
     let file = OpenOptions::new()
         .read(true)
         .create(true)
-        .append(true)
-        .open("logs")
+        .truncate(true)
+        .write(true)
+        .open(log_path)
         .unwrap();
+    tracing_subscriber::fmt()
+        .with_ansi(true)
+        .with_writer(file)
+        .init();
+
     info!("Starting LSP server");
     let (server, _) = async_lsp::MainLoop::new_server(|client| {
-        info!("server");
-
         let mut router = Router::new(lsp::ServerState {
             client: client.clone(),
             documents: HashMap::default(),
@@ -43,7 +49,11 @@ async fn main() {
             .request::<request::Initialize, _>(|_, _| async move {
                 Ok(InitializeResult {
                     capabilities: lsp::capabilities(),
-                    server_info: None,
+                    server_info: ServerInfo {
+                        name: "Phlex Emmet Language Server".to_string(),
+                        version: env!("CARGO_PKG_VERSION").to_string().into(),
+                    }
+                    .into(),
                 })
             })
             .request::<request::Completion, _>(|st, params| {
@@ -56,8 +66,6 @@ async fn main() {
                     .as_str()
                     .to_owned();
 
-                info!(position = ?params.text_document_position.position);
-
                 let doc = st
                     .documents
                     .get(&uri)
@@ -67,7 +75,6 @@ async fn main() {
                     ))
                     .unwrap();
                 let abbr = extract_abbreviation(doc, params.text_document_position.position);
-                info!("Completion request: {:#?}", &abbr);
                 async move {
                     Ok(lsp::completion_handler(
                         abbr.as_str(),
@@ -99,11 +106,6 @@ async fn main() {
             .layer(ClientProcessMonitorLayer::new(client))
             .service(router)
     });
-
-    tracing_subscriber::fmt()
-        .with_ansi(true)
-        .with_writer(file)
-        .init();
 
     // Prefer truly asynchronous piped stdin/stdout without blocking tasks.
     #[cfg(unix)]
