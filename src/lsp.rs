@@ -3,11 +3,7 @@ use crate::rendering::Renderer;
 use crate::types::EmmetNode;
 use anyhow::Result;
 
-use async_lsp::lsp_types::{
-    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionList,
-    CompletionOptions, CompletionResponse, CompletionTextEdit, Position, Range, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit,
-};
+use async_lsp::lsp_types::*;
 use async_lsp::{ClientSocket, ResponseError};
 use ropey::Rope;
 use std::collections::HashMap;
@@ -37,20 +33,16 @@ pub fn capabilities() -> ServerCapabilities {
 
 type CompletionResult = Result<Option<CompletionResponse>, ResponseError>;
 
-fn internal_error(message: &str) -> CompletionResult {
-    Err(ResponseError::new(
-        async_lsp::ErrorCode::INTERNAL_ERROR,
-        message,
-    ))
-}
-
 fn text_edit(abbr: &str, expansion: String, position: Position) -> CompletionTextEdit {
     CompletionTextEdit::Edit(TextEdit {
         range: Range {
-            start: position,
-            end: Position {
+            start: Position {
                 line: position.line,
                 character: position.character - abbr.len() as u32,
+            },
+            end: Position {
+                line: position.line,
+                character: position.character,
             },
         },
         new_text: expansion,
@@ -62,11 +54,6 @@ fn completion_item(abbr: &str, edit: CompletionTextEdit) -> CompletionItem {
         let expansion = new_text;
         return CompletionItem {
             label: abbr.to_string(),
-            label_details: CompletionItemLabelDetails {
-                detail: "label_details".to_string().into(),
-                description: "description".to_string().into(),
-            }
-            .into(),
             kind: CompletionItemKind::SNIPPET.into(),
             detail: Some(expansion.clone()),
             text_edit: Some(edit),
@@ -87,9 +74,9 @@ fn try_parse_completion(abbr: &str) -> Result<EmmetNode, ResponseError> {
 }
 
 pub async fn completion_handler(abbr: &str, position: Position) -> CompletionResult {
-    let expansion = try_parse_completion(&abbr)?.render();
-    let edit = text_edit(&abbr, expansion, position);
-    let item = completion_item(&abbr, edit);
+    let expansion = try_parse_completion(abbr)?.render();
+    let edit = text_edit(abbr, expansion, position);
+    let item = completion_item(abbr, edit);
     let response = CompletionResponse::List(CompletionList {
         is_incomplete: false,
         items: vec![item],
