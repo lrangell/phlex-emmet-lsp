@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2](https://github.com/lrangell/phlex-emmet-lsp/compare/v0.3.1...v0.3.2) - 2025-01-14
+
+### Fixed
+
+- return None instead of Error
+- disable resolve provider
+
+### Other
+
+- add vscode link
+
 ## [0.3.1](https://github.com/lrangell/phlex-emmet-lsp/compare/v0.3.0...v0.3.1) - 2025-01-14
 
 ### Fixed
