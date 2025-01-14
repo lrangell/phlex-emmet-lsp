@@ -1,7 +1,6 @@
 #![allow(unstable_name_collisions)]
 use crate::types::EmmetNode;
 use itertools::Itertools;
-use tracing::info;
 
 pub trait Renderer {
     fn render(&self) -> String;
@@ -28,12 +27,14 @@ impl Renderer for EmmetNode {
             format!("({})", { arguments.iter().join(", ") })
         };
 
-        format!(
-            "{tag}{arguments} {{ {children} }} {siblings}",
-            tag = self.tag,
-            arguments = args,
-            children = self.children.iter().map(|n| n.render()).join("\n"),
-            siblings = self.siblings.iter().map(|n| n.render()).join("\n")
-        )
+        let siblings = format!("\n{}", self.siblings.iter().map(|n| n.render()).join("\n"));
+        let children = self.children.iter().map(|n| n.render()).join("\n");
+
+        let expansion = format!("{tag}{args} {{ {children} }}{siblings}", tag = self.tag,);
+
+        match self.multiplier {
+            1 => expansion,
+            n => [expansion.as_str()].repeat(n).join("\n"),
+        }
     }
 }
