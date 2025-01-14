@@ -74,7 +74,9 @@ fn try_parse_completion(abbr: &str) -> Result<EmmetNode, ResponseError> {
 }
 
 pub async fn completion_handler(abbr: &str, position: Position) -> CompletionResult {
-    let expansion = try_parse_completion(abbr)?.render();
+    let Ok(expansion) = try_parse_completion(abbr).map(|e| e.render()) else {
+        return Ok(None);
+    };
     let edit = text_edit(abbr, expansion, position);
     let item = completion_item(abbr, edit);
     let response = CompletionResponse::Array(vec![item]);
