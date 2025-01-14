@@ -22,7 +22,6 @@ pub fn capabilities() -> ServerCapabilities {
     ServerCapabilities {
         completion_provider: CompletionOptions {
             trigger_characters: charset.into(),
-            resolve_provider: Some(true),
             ..CompletionOptions::default()
         }
         .into(),
@@ -56,6 +55,7 @@ fn completion_item(abbr: &str, edit: CompletionTextEdit) -> CompletionItem {
             label: abbr.to_string(),
             kind: CompletionItemKind::SNIPPET.into(),
             detail: Some(expansion.clone()),
+            documentation: None,
             text_edit: Some(edit),
             ..CompletionItem::default()
         };
@@ -77,10 +77,7 @@ pub async fn completion_handler(abbr: &str, position: Position) -> CompletionRes
     let expansion = try_parse_completion(abbr)?.render();
     let edit = text_edit(abbr, expansion, position);
     let item = completion_item(abbr, edit);
-    let response = CompletionResponse::List(CompletionList {
-        is_incomplete: false,
-        items: vec![item],
-    });
+    let response = CompletionResponse::Array(vec![item]);
 
     Ok(Some(response))
 }
