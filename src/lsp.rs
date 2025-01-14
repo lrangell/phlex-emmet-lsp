@@ -17,6 +17,7 @@ pub fn capabilities() -> ServerCapabilities {
     let charset: Vec<String> = ('a'..='z')
         .chain('A'..='Z')
         .chain(['>', '.', '+', '*', '#'])
+        .chain('0'..='9')
         .map(String::from)
         .collect();
     ServerCapabilities {
