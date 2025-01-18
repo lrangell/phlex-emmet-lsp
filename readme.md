@@ -19,8 +19,10 @@ The Neovim plugin can be found at [https://github.com/lrangell/phlex-emmet.nvim]
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
-{
+return {
   "lrangell/phlex-emmet.nvim",
+  opts = {},
+  ft = "ruby"
 }
 ```
 
